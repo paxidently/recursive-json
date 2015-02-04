@@ -12,30 +12,17 @@ npm install recursive-json
 ````js
 var rj = require('recursive-json');
 
-// Load single file:
-rj.sync('package.json');
+var json = rj.sync('**/**/*.json');
 
-// If `package` directory or file doesn't exists, will be tried `package.json`:
-rj.sync('package');
-
-// Load directory:
-rj.sync('src/data');
-
-// Enable hidden files:
-rj.sync('src/data', { hidden: true });
-// or
-rj.sync('src/data', { '.': true });
-
-// Enable files with names started with underscore:
-rj.sync('src/data', { underscore: true });
-// or
-rj.sync('src/data', { _: true });
+rj('**/**/*.json', function (err, json) {
+    console.log(json);
+});
 
 ````
 
 ## TODO
 
- *  Write async version.
+ *  Write truly async version.
  *  Add tests.
  *  Add API description.
  *  Add JSDoc comments.

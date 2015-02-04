@@ -1,12 +1,14 @@
 { "name":              "recursive-json"
-, "version":           "0.1.0"
-, "description":       "Recursive read JSON files in directory."
+, "version":           "1.0.0"
+, "description":       "Recursively read JSON files in directory."
 , "author":            "Yuri Hater <paxidently@yandex.com>"
 , "main":              "index.js"
 , "repository":      { "type": "git"
                      , "url":  "https://github.com/paxidently/recursive-json"          }
 , "bugs":            { "url":  "https://github.com/paxidently/recursive-json/issues"   }
+, "dependencies":    { "glob":   "^4.3.5"
+                     , "mkobjp": "^0.1.0"                                              }
 , "keywords":        [ "json"
-                     , "recursive"                                               ]
+                     , "recursive"                                                     ]
 , "license":           "MIT"
 }

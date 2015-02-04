@@ -1,67 +1,43 @@
-var   fs   = require('fs')
-    , path = require('path')
+var   fs     = require('fs')
+    , path   = require('path')
+    , glob   = require('glob')
+    , mkobjp = require('mkobjp')
 ;
 
-var jsonFileName = /^(.*)\.json$/;
+var   jsonExt = /\.json$/
+    , relRoot = /^\.?\//;
 
-var recursive = function (dir, options) {
-    options = options || {};
-    
+var load = function (files) {
     var obj = {};
     
-    dir = path.resolve(dir);
-    
-    if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
-        // Load subdirs
+    files.forEach(function (path) {
+        var json = fs.readFileSync(path);
+        path = path.replace(relRoot, '').replace(jsonExt, '').split('/');
+        mkobjp(obj, path);
         
-        var list = fs.readdirSync(dir);
-        
-        // Sort list and optionally filter hidden files and files with names started with underscore
-        list = list.sort().filter(function (x) {
-            if ((!(options.hidden     || options['.'])) && (x[0] == '.')) return false;
-            if ((!(options.underscore || options._   )) && (x[0] == '_')) return false;
-            return true;
-        });
-        
-        // Get list of directories
-        var dirs = list.filter(function (x) {
-            return fs.statSync(path.resolve(dir, x)).isDirectory();
-        });
-        
-        // Get list of files
-        var files = list.filter(function (x) {
-            return fs.statSync(path.resolve(dir, x)).isFile();
-        });
-        
-        // Load subdirectories
-        dirs.forEach(function (x) {
-            obj[x] = recursive(path.resolve(dir, x), options);
-        });
-        
-        // Load files
-        files.forEach(function (x) {
-            if (jsonFileName.exec(x)) {
-                obj[jsonFileName.exec(x)[1]] = recursive(path.resolve(dir, x), options);
-            }
-        });
-    }
-    else {
-        // Load file
-        // If it doesn't exists, add .json extension
-        dir = fs.existsSync(dir) ? dir : dir + '.json';
-        
-        if (fs.existsSync(dir) && jsonFileName.exec(path.basename(dir))) {
-            try {
-                obj = JSON.parse(fs.readFileSync(dir));
-            } catch (e) { }
+        for (var i = 0, t = obj; i < path.length; i++) {
+            t = t[path[i]];
         }
-    }
+        
+        json = JSON.parse(json);
+        
+        for (var key in json) {
+            t[key] = json[key];
+        }
+    });
     
     return obj;
 };
 
-module.exports = {
-    sync: recursive
+var sync = function (pattern) {
+    var files = glob.sync(pattern);
+    return load(files);
 };
 
-// var rj = require('./'); rj.sync('.');
+module.exports = function (pattern, callback) {
+    glob(pattern, function (err, files) {
+        callback(err, load(files));
+    });
+};
+
+module.exports.sync = sync;
